@@ -305,7 +305,7 @@ path = "./peppers.png"
 
 # Read plain image 
 mat = helper.img_to_mat(path)
-# helper.display_image(mat)
+helper.display_image(mat)
 # histogram.plot_histogram(mat)
 
 
@@ -366,10 +366,10 @@ w,h = mat.shape
 
 mat1 = np.copy(mat)
 x0, u_x, y0, u_y, z0, u_z  = 0.1, 2.6, 0.48480196431, 0.95, 0.1, 0.53341366688
-t0 = time()
+# t0 = time()
 I_enc, u_z, z0, u_x, x0, u_y, y0 = encrypt(mat1, x0, u_x, y0, u_y, z0, u_z)
-t1 = time()
-print("enctime", (t1-t0)/(6.328571428571428))
+# t1 = time()
+# print("enctime", (t1-t0)/(6.328571428571428))
 
 
 # a, b = helper.vertical_pairings(I_enc, rand_pix_vert)
@@ -439,7 +439,7 @@ print("enctime", (t1-t0)/(6.328571428571428))
 # z01 = z0 + (10** (-9))
 
 # I_enc1, u_z, z01, u_x, x0, u_y, y0 = encrypt(mat, x0, u_x, y0, u_y, z01, u_z)
-# helper.display_image(I_enc1)
+helper.display_image(I_enc)
 # helper.display_image(np.absolute(I_enc1-I_enc))
 	
 I_dec = decrypt(I_enc, u_z, z0, u_x, x0, u_y, y0)
@@ -454,7 +454,7 @@ I_dec = decrypt(I_enc, u_z, z0, u_x, x0, u_y, y0)
 
 
 """key sensitivity analysis"""
-# helper.display_image(I_dec)
+helper.display_image(I_dec)
 # I_dec_wrong = decrypt(I_enc, u_z, z01, u_x, x0, u_y, y0)
 # helper.display_image(I_dec_wrong)
 # I_dec1 = decrypt(I_enc1, u_z, z01, u_x, x0, u_y, y0)
