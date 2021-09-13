@@ -161,19 +161,19 @@ def scramble(mat, x0, u_x, y0, u_y):
 	return np.concatenate((I1,I2), axis = 0), x0, u_x, y0, u_y					
 
 
-def create_key_stream(u_z, z0, shape, power):
+def create_key_stream(x0, u_x, y0, u_y, shape, power):
 
 	# print("inside create_key_stream:")
 	# print("z0", z0)
 	# print("u_z", u_z)
 
-	k = logistic_map_sequences(u_z, z0, shape)
+	k, unused = sine_map(x0, u_x, y0, u_y, shape)
 	k = np.mod(np.floor(k * power), 256).astype(int)
 
 	return k
 
 
-def diffuse(mat, z0, u_z):
+def diffuse(mat, x0, u_x, y0, u_y):
 	# print(mat)
 	shape, p = helper.initial_processing(mat)
 	w, h = shape
@@ -185,7 +185,7 @@ def diffuse(mat, z0, u_z):
 	# print("z0", z0)
 	# print("u_z", u_z)
 	
-	k = create_key_stream(u_z, z0, shape, power).reshape(p.shape)
+	k = create_key_stream(x0, u_x, y0, u_y, shape, power).reshape(p.shape)
 
 	s0 = int((np.sum(p) - p[0,0])% 256)
 	# print(k[ 0,0], p[0, 0], s0)
@@ -204,10 +204,10 @@ def diffuse(mat, z0, u_z):
 
 	print("diffusion done")
 
-	return p.reshape(shape), u_z, z0
+	return p.reshape(shape), x0, u_x, y0, u_y
  
 
-def encrypt(mat, x0, u_x, y0, u_y, z0, u_z):
+def encrypt(mat, x0, u_x, y0, u_y):
 	
 	scrambled_mat, x0, u_x, y0, u_y = scramble(mat, x0, u_x, y0, u_y)
 	# helper.display_image(scrambled_mat)
@@ -216,13 +216,13 @@ def encrypt(mat, x0, u_x, y0, u_y, z0, u_z):
 	# diffuse(scrambled_mat)
 	# return scrambled_mat
 	# helper.display_image(scrambled_mat)
-	diffuse_mat, u_z, z0 = diffuse(scrambled_mat, z0, u_z)
+	diffuse_mat, x0, u_x, y0, u_y = diffuse(scrambled_mat, x0, u_x, y0, u_y)
 
 	
 	# return scrambled_mat, u_z, z0, u_x, x0, u_y, y0
-	return diffuse_mat, u_z, z0, u_x, x0, u_y, y0
+	return diffuse_mat, u_x, x0, u_y, y0
 
-def decrypt(mat, u_z, z0, u_x, x0, u_y, y0):
+def decrypt(mat, u_x, x0, u_y, y0):
 	
 
 	shape,p = helper.initial_processing(mat)
@@ -232,7 +232,7 @@ def decrypt(mat, u_z, z0, u_x, x0, u_y, y0):
 
 	# print(shape_x)
 	CT, XT, YT = construction_of_tables(shape_x, x0, u_x, y0, u_y)
-	k = create_key_stream(u_z, z0, shape, power).reshape(p.shape)
+	k = create_key_stream(x0, u_x, y0, u_y, shape, power).reshape(p.shape)
 
 	L = n * m
 
@@ -318,7 +318,7 @@ w,h = mat.shape
 # rand_pix_hor = helper.Rand(0, ((w-2)*(h-1)), 3000)
 # rand_pix_diag = helper.Rand(0, ((w-2)*(h-2)), 3000)
 
-# I_enc1, u_z, z0, u_x, x0, u_y, y0 = encrypt(mat1, x0, u_x, y0, u_y, z0, u_z)
+# I_enc1, u_x, x0, u_y, y0 = encrypt(mat1, x0, u_x, y0, u_y)
 
 """correlation coefficients"""
 # a,b = helper.vertical_pairings(mat, rand_pix_vert)
@@ -364,10 +364,10 @@ w,h = mat.shape
 # plt.show()
 
 
-mat1 = np.copy(mat)
-x0, u_x, y0, u_y, z0, u_z  = 0.1, 2.6, 0.48480196431, 0.95, 0.1, 0.53341366688
+# mat1 = np.copy(mat)
+x0, u_x, y0, u_y  = 0.1, 2.6, 0.48480196431, 0.95
 # t0 = time()
-I_enc, u_z, z0, u_x, x0, u_y, y0 = encrypt(mat1, x0, u_x, y0, u_y, z0, u_z)
+I_enc, u_x, x0, u_y, y0 = encrypt(mat, x0, u_x, y0, u_y)
 # t1 = time()
 # print("enctime", (t1-t0)/(6.328571428571428))
 
@@ -442,7 +442,7 @@ I_enc, u_z, z0, u_x, x0, u_y, y0 = encrypt(mat1, x0, u_x, y0, u_y, z0, u_z)
 helper.display_image(I_enc)
 # helper.display_image(np.absolute(I_enc1-I_enc))
 	
-I_dec = decrypt(I_enc, u_z, z0, u_x, x0, u_y, y0)
+I_dec = decrypt(I_enc, u_x, x0, u_y, y0)
 # t2 = time()
 # print("dec_time", t2-t1)
 
